@@ -1,0 +1,50 @@
+# 请求数据
+resp:
+  url: https://shop.laiyangni.com/api/lyn/wechat/home/shopInfo/v2
+  office_b:
+    sign: WVGXQZv6TOb02bHtPX4oDA==
+    data: FvFERXohbOfWVgl8z+ZZb4dzFmSlqJ8QBvAv4scUSAyLESeKfVlNcpB21ZJI75RtC8j0dmmXpbxrDAoYtKswG9hwRmIWsP/04h7G0INNAvha4wFwLhT1nAdGxl9LsXXu
+  dorm: &data
+    sign: tEK46Ovd2sK/9ciiaoGwDw==
+    data: qQL0JVx3Wce8U9Xfaywyuz4jNLhdSqIoV6h81x9hEorMWnND7t7sxP6OMRTnCNdQVnHXFrwjr6U7av7jmNVvaupYWcB8qHLYkNkbuDTuKWtxdAKx+TPyYt2iPvQSNh9P
+  data: 
+    <<: *data # 引用锚点
+    
+# 微信机器人 wx-bot
+wxbot:
+  url: http://wxpusher.zjiecode.com/api/send/message
+  body:
+    appToken: AT_krZaCpAfnpEEP5m9QosMIXP7qAHSrlBo
+    content: msg
+    # 消息摘要
+    summary: summary
+    # 1文字  2html 3markdown
+    contentType: 1
+    # topicIds:[123]
+    uids:
+        # - UID_mqX5vmD6UspSoZvZSiUNFYcuL9Gi  # test
+        - UID_RwNX0uuDjA9Nvo5QlwhqbYhOHciV
+        # - UID_VTRUelfq0AGk83Srublr4s4IcCjI
+        # - UID_GFInmNliLr7M3PaRUOQdpqsMLEZv
+
+# 各种信息的路径
+path:
+  # 用户数据
+  dat_file: config/usr.dat
+
+# 设定定时请求参数
+setInterval:
+  # 请求间隔时间
+  # delta_time: 5*60
+  delta_time: 3
+  # 自动唤醒时间
+  wake_time: 7:30:0
+  # 自动休眠时间
+  sleep_time: 18:0:0
+
+# 商铺筛选参数
+constraint:
+  # 特别关心
+  likes: 27572,25235,27944,27946,25235,25260
+  # 商家距离限定
+  max_distance: 2.5e3
