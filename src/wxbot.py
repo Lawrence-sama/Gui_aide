@@ -8,8 +8,8 @@ def sendmsg(title, msg):
     with open(yaml_file, 'rt', encoding="utf-8") as f:
         args = AttrDict(yaml.safe_load(f))
 
-    args.wxbot.summary = title
-    args.wxbot.content = msg
+    args.wxbot["body"]["summary"] = title
+    args.wxbot["body"]["content"] = msg
 
     fails = 0
     while True:

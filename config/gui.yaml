@@ -22,10 +22,10 @@ wxbot:
     contentType: 1
     # topicIds:[123]
     uids:
-        # - UID_mqX5vmD6UspSoZvZSiUNFYcuL9Gi  # test
-        - UID_RwNX0uuDjA9Nvo5QlwhqbYhOHciV
+        - UID_mqX5vmD6UspSoZvZSiUNFYcuL9Gi  # caozhixun 6593
+        # - UID_RwNX0uuDjA9Nvo5QlwhqbYhOHciV
         # - UID_VTRUelfq0AGk83Srublr4s4IcCjI
-        # - UID_GFInmNliLr7M3PaRUOQdpqsMLEZv
+        # - UID_GFInmNliLr7M3PaRUOQdpqsMLEZv    # caozhixun 1256
 
 # 各种信息的路径
 path:
