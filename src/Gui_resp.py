@@ -79,16 +79,16 @@ def notice_match():
     # 「新活动」通知
     # 「售罄」通知
     pass
+if __name__ == "__main__":
+    # data = shop_resp()
+    likes = [43490,42686,42492]
+    todayAlert = []
+    data = json.load(open("test.txt"))
 
-# data = shop_resp()
-likes = [43490,42686,42492]
-todayAlert = []
-data = json.load(open("test.txt"))
-
-while True:
-    shop_infos = data_preprocess(data)
-    wxpusher(shop_infos)
-    time.sleep(300)    
+    while True:
+        shop_infos = data_preprocess(data)
+        wxpusher(shop_infos)
+        time.sleep(300)    
 
 
 print("the end")
