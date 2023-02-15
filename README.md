@@ -4,7 +4,7 @@
 
 ## 项目功能简介
 
-使用 `requests` 对[吃吃龟商铺接口](https://shop.laiyangni.com/api/lyn/wechat/home/shopInfo/v2)发送请求，获取店铺信息，并以此为基础实现特别关注店铺提醒，自动抢单等功能
+使用 `requests` 对[吃吃龟商铺接口](https://shop.laiyangni.com/api/lyn/wechat/home/shopInfo/v3)发送请求，获取店铺信息，并以此为基础实现特别关注店铺提醒，自动抢单等功能
 
 ## 目前已实现的功能：
 
