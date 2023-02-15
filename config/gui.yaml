@@ -1,6 +1,6 @@
 # 请求数据
 resp:
-  url: https://shop.laiyangni.com/api/lyn/wechat/home/shopInfo/v2
+  url: https://agent.laiyangni.com/api/lyn/wechat/home/shopInfo/v3
   office_b:
     sign: WVGXQZv6TOb02bHtPX4oDA==
     data: FvFERXohbOfWVgl8z+ZZb4dzFmSlqJ8QBvAv4scUSAyLESeKfVlNcpB21ZJI75RtC8j0dmmXpbxrDAoYtKswG9hwRmIWsP/04h7G0INNAvha4wFwLhT1nAdGxl9LsXXu

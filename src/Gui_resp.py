@@ -1,14 +1,22 @@
 #V0.1 感兴趣的店自动手机推送的功能
-
+#V1.0 1.修改了代码架构，采用mongoDB作为数据库 2.从未在数据库中出现的新店出现后推送 3.曾经出现的店时隔14天以上时再次出现时
 
 import requests, yaml, json
 from attrdict import AttrDict
 from fake_useragent import UserAgent
 import json
 import wxbot
+
+
+
 import time
 import datetime
+from pymongo import MongoClient
+current_day_info = []
 
+
+client = MongoClient("localhost", 27017)
+collection = client["GuiAssistant"]["shopsinfosDB"]
 
 def shop_resp() -> dict:
     # 读取参数配置文件
@@ -17,6 +25,7 @@ def shop_resp() -> dict:
         args = AttrDict(yaml.safe_load(f))
 
     ua = UserAgent()
+
     HEADERS = {
         "Content-Type": "application/json",
         "User-Agent": ua.random,
@@ -34,44 +43,109 @@ def shop_resp() -> dict:
 
 
 # 『数据预处理』 筛选满足条件的活动，整理成表格，保存为csv 存入数据库
-# 将surplus「剩余量」存入csv 数据库
+
 def data_preprocess(data: list):
-    # 1.筛选出距离小于3km的店铺（distance<3000）,筛选出需要的信息，包括：sid，shopname，shopaddress，actuvityList
-    # 2.在筛选出的信息里找目标店铺，如果有则发送，并把todayAlert设为true
+    # 1.筛选出距离小于3km的店铺（distance<3000）,
+    # 2.筛选出需要的信息，包括：sid（店铺id），shopname（店铺名称），"platformType": 平台类型
+    # "todayStartTime": 活动开始时间 "todayEndTime": 活动结束时间，"full": 最低实付，"sub": 返现额
     
     shop_infos = []
     for shop in data:
-        plat = shop["activityList"][0]["platformType"]
+        # plat = shop["activityList"][0]["platformType"] 弃用代码
         shop_info = {
-            "index": 0,
             "sid": shop["sid"],
             "name": shop["shopname"],
-            "plat": plat,
+            "platformType":shop["platformType"],
+            "todayStartTime":shop["todayStartTime"],
+            "todayEndTime":shop["todayEndTime"],
+            "full":shop["full"],
+            "sub":shop["sub"],
+            "surplus":shop["surplus"],
             "distance":shop["distance"]
-            # "todayAlert":False
         }
+
         if shop_info["distance"] <=3000:
             shop_infos.append(shop_info)
     return shop_infos
 
 
-
-
-def wxpusher(shop_infos):
-    global todayAlert
-    curr_time = datetime.datetime.now()
-    if curr_time.hour not in [8,9,10,11,12,13,14,15,16,17,18,19]:
-        return 
-    for info in shop_infos:
-        #  and curr_time.hour in [8,9,10,11,12,13,14,15,16,17,18,19]
-        if info["sid"] in likes and not info["sid"] in todayAlert:
-            # print("alarm")
-            wxbot.sendmsg(title=info["name"], msg="你感兴趣的店铺")
-            print("已发送店铺：" +info["name"])
-            todayAlert.append(info["sid"])
-    if  curr_time.hour == 0:
-        todayAlert = []
+def wxpusher(info,msg):
     
+    wxbot.sendmsg(title=info["shopname"], msg=msg)
+    print("已发送店铺：" +info["shopname"])
+
+    
+def currentday_check(shop_infos):
+    global current_day_info
+    if shop_infos in current_day_info or shop_infos == current_day_info:
+        return False
+    else:
+        current_new = []
+        for i in shop_infos:
+            if i in  current_day_info:
+                continue
+            else:
+                current_day_info.append(i)
+                current_new.append(i)
+        print("本日有店铺上新",datetime.datetime.now(),current_new)
+        database_check(current_new)
+        
+    
+def database_check(current_new):
+    #1.读入DB中的sid，lastAppear
+    #2.current_new的sid是否在DB中
+    #3.如果不在，存储信息+alarm
+    #4.如果在，查看时间是否超过14，如果超过，alarm。将所有时间归零
+    for row in current_new:
+        if collection.find_one({"sid": row["sid"]}):
+            # print(collection.find_one({"sid": row["sid"]}))
+            if collection.find_one({"sid": row["sid"]}):
+                # collection.update_one({"sid": row["sid"]}, {"$set": {"lastAppear": 0}})
+                if collection.find_one({"sid": row["sid"]})["lastAppear"] >= 14:
+                    collection.update_one({"sid": row["sid"]}, {"$set": {"lastAppear": 0}})
+                    wxpusher(info=row,msg="店铺时隔多天（14+）重新出现")
+                    print("已发送店铺：" +row["shopname"])
+                    print("reappeared_alarm")
+        else:
+            collection.insert_one({"index": collection.find().sort([("index",-1)]).skip(0).limit(1)[0]["index"]+1, "sid": row["sid"],"name":row["shopname"],"plat":row["platformType"],"lastAppear":0})
+            
+            wxpusher(info=row,msg="出现了数据库中没有的新店铺")
+            
+            print("new shop alarm")
+            print("已发送店铺：" +row["shopname"])
+
+
+        likelist_check(current_new)
+
+
+
+def likelist_check(current_new):
+    for info in current_new:
+        
+        if info["sid"] in likes:
+            likes.remove(info["sid"])
+            # wxpusher()
+            wxpusher(info=info,msg="在likelist里的店铺")
+
+            # wxbot.sendmsg(title=info["name"], msg="你感兴趣的店铺"
+
+            print("like_check_已发送店铺：" +info["shopname"])
+
+
+
+
+def daily_upgrade():
+    global current_day_info
+    time.sleep(36000)
+    # 清空前需要存一下信息
+    print(current_day_info)
+    current_day_info = []
+
+    for i in range(collection.find().sort([("index",-1)]).skip(0).limit(1)[0]["index"]):
+        collection.update_one({'index': i}, {"$set": {"lastAppear":collection.find_one({'index': i})["lastAppear"]+1}}) 
+    
+
+
 
 
 # 『通知』 对比当前数据于上一次请求数据的差别，发送对应通知
@@ -79,17 +153,19 @@ def notice_match():
     # 「新活动」通知
     # 「售罄」通知
     pass
+
+
 if __name__ == "__main__":
     # data = shop_resp()
-    likes = [43490,42686,42492]
+    likes = [43490,42686,42492,43964]
     todayAlert = []
     data = json.load(open("test.txt"))
-
+    current_day_info = []
     while True:
         shop_infos = data_preprocess(data)
-        wxpusher(shop_infos)
-        time.sleep(300)    
-
-
-print("the end")
+        currentday_check(data)
+        # wxpusher(shop_infos,likes)
+        if datetime.datetime.now().hour == 21:
+            daily_upgrade()
+        time.sleep(300)
 
