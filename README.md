@@ -24,7 +24,7 @@ V0.1（2022.10.23）:
    
 代码流程图：
 
-![frame](./Gui Assistant.jpg)
+![frame]([./Gui Assistant.jpg](https://github.com/Lawrence-sama/Gui_aide/blob/master/picture/Gui%20Assistant.jpg))
 
 
 ## 饼：
