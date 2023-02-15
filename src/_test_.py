@@ -1,16 +1,16 @@
-# import Gui_resp
+import Gui_resp
 import csv
 # import pandas as pd
-# data = Gui_resp.shop_resp()
+data = Gui_resp.shop_resp()
 import datetime
 
  
 
  
-# filename='test.txt'
-# with open(filename,'w') as file_obj:
-#   file_obj.write(data)
-#   print("success")
+filename='test.txt'
+with open(filename,'w',encoding='utf-8') as file_obj:
+  file_obj.write(data)
+  print("success")
 
 # Gui_resp.data_preprocess(data)
 

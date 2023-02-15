@@ -1,5 +1,4 @@
-#V0.1 感兴趣的店自动手机推送的功能
-#V1.0 1.修改了代码架构，采用mongoDB作为数据库 2.从未在数据库中出现的新店出现后推送 3.曾经出现的店时隔14天以上时再次出现时
+
 
 import requests, yaml, json
 from attrdict import AttrDict
@@ -13,6 +12,7 @@ import time
 import datetime
 from pymongo import MongoClient
 current_day_info = []
+likes = [43490,42686,42492,43964]
 
 
 client = MongoClient("localhost", 27017)
@@ -136,13 +136,13 @@ def likelist_check(current_new):
 
 def daily_upgrade():
     global current_day_info
-    time.sleep(36000)
     # 清空前需要存一下信息
     print(current_day_info)
     current_day_info = []
 
     for i in range(collection.find().sort([("index",-1)]).skip(0).limit(1)[0]["index"]):
         collection.update_one({'index': i}, {"$set": {"lastAppear":collection.find_one({'index': i})["lastAppear"]+1}}) 
+    time.sleep(36000)
     
 
 
@@ -153,19 +153,11 @@ def notice_match():
     # 「新活动」通知
     # 「售罄」通知
     pass
-
-
 if __name__ == "__main__":
-    # data = shop_resp()
-    likes = [43490,42686,42492,43964]
-    todayAlert = []
-    data = json.load(open("test.txt"))
-    current_day_info = []
-    while True:
-        shop_infos = data_preprocess(data)
-        currentday_check(data)
-        # wxpusher(shop_infos,likes)
-        if datetime.datetime.now().hour == 21:
-            daily_upgrade()
+    while 1:
+        data = shop_resp()
+        upgrate_time = time.localtime().tm_hour
         time.sleep(300)
-
+        if upgrate_time == 20:
+            print("daily_upgrade",datetime.datetime.now())
+            daily_upgrade()
